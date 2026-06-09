@@ -24,7 +24,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        if(!email || !password) {
+        console.log("LOGIN ATTEMPT:", {
+          email,
+          passwordLength: password?.length,
+        })
+
+        if (!email || !password) {
+          console.log("Missing email or password")
           return null;
         }
 
@@ -34,7 +40,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           email: email.toLowerCase(),
         });
 
-        if(!user) {
+        console.log("USER FOUND:", user)
+
+        if (!user) {
+          console.log("user not found")
           return null;
         }
 
@@ -43,23 +52,30 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           user.password
         );
 
-        if(!validPassword) {
+        console.log("PASSWORD VALID:", validPassword)
+
+        if (!validPassword) {
+          console.log("Password mismatch")
           return null;
         }
 
-        return {
+        const authUser = {
           id: user._id.toString(),
           email: user.email,
           username: user.username,
           image: user.image,
-        };
+        }
+
+        console.log("RETURNING USER:", authUser);
+
+        return authUser;
       },
     }),
   ],
 
   callbacks: {
     async jwt({ token, user }) {
-      if(user) {
+      if (user) {
         token.id = user.id;
         token.username = user.username;
       }
@@ -69,7 +85,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
 
     async session({ session, token }) {
-      if(session.user) {
+      if (session.user) {
         session.user.id = token.id as string;
         session.user.username = token.username as string;
       }
