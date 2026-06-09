@@ -1,0 +1,9 @@
+{
+  "extends": "../typescript-config/base.json",
+  "compilerOptions": {
+    "incremental": true,
+    "types": ["node"],
+    "composite": true
+  },
+  "include": ["src/**/*"]
+}

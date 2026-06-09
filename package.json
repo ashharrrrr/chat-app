@@ -10,6 +10,7 @@
     "test": "turbo run test"
   },
   "devDependencies": {
+    "@types/node": "^25.9.2",
     "prettier": "^3.7.4",
     "turbo": "^2.9.16",
     "typescript": "5.9.2"
@@ -17,5 +18,10 @@
   "packageManager": "pnpm@11.5.2",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.6.3",
+    "zod": "^4.4.3"
   }
 }
