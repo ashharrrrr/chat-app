@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { clientPromise } from "@chat/db";
 
 export default function Home() {
   return (
