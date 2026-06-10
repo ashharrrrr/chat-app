@@ -1,0 +1,13 @@
+import { z } from "zod";
+
+export const createConversationSchema = z.object({
+  username: z.string().min(3, "Username must be at least 3 characters").max(20, "Username must be at most 20 characters"),
+});
+
+export const sendMessageSchema = z.object({
+  conversationId: z.string().min(1, "Conversation ID is required"),
+  content: z.string().trim().min(1, "Message cannot be empty").max(2000, "Message is too long"),
+});
+
+export type createConversationInput = z.infer<typeof createConversationSchema>;
+export type sendMessageInput = z.infer<typeof sendMessageSchema>;
