@@ -85,9 +85,6 @@ importers:
 
   apps/web:
     dependencies:
-      '@auth/mongodb-adapter':
-        specifier: ^3.11.2
-        version: 3.11.2(mongodb@7.2.0)
       '@chat/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -248,11 +245,6 @@ packages:
         optional: true
       nodemailer:
         optional: true
-
-  '@auth/mongodb-adapter@3.11.2':
-    resolution: {integrity: sha512-3yKYvPB/7NjDN5VW6iymEdQEKQOezqVpev4heAhN+zxz5G/jOIQdxBu8iF8nIomF8ggY+FRDqysSNwb72JM6dw==}
-    peerDependencies:
-      mongodb: ^6
 
   '@babel/code-frame@7.29.7':
     resolution: {integrity: sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw==}
@@ -2937,15 +2929,6 @@ snapshots:
       oauth4webapi: 3.8.6
       preact: 10.24.3
       preact-render-to-string: 6.5.11(preact@10.24.3)
-
-  '@auth/mongodb-adapter@3.11.2(mongodb@7.2.0)':
-    dependencies:
-      '@auth/core': 0.41.2
-      mongodb: 7.2.0
-    transitivePeerDependencies:
-      - '@simplewebauthn/browser'
-      - '@simplewebauthn/server'
-      - nodemailer
 
   '@babel/code-frame@7.29.7':
     dependencies:
