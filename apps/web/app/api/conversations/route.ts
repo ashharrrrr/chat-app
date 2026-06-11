@@ -8,10 +8,7 @@ import { createConversationSchema } from "@chat/shared-types";
 
 export async function POST(req: Request){
   try{
-    console.log("REQUEST RECEIVED")
     const session = await auth();
-
-    console.log("SESSION", session)
 
     if(!session?.user?.id) {
       return NextResponse.json(
