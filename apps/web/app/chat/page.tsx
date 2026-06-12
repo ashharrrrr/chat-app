@@ -1,20 +1,25 @@
 import { auth } from "@/auth";
-import { redirect } from "next/navigation";
+
+import { redirect }
+  from "next/navigation";
+
 import LogoutButton from "@/components/LogoutButton";
 
+import ChatShell
+  from "@/components/chat/ChatShell";
+
 export default async function ChatPage() {
-  const session = await auth();
+  const session =
+    await auth();
 
-  console.log("CHAT SESSION: ", session)
-
-  if(!session) {
+  if (!session) {
     redirect("/login");
   }
 
-  return(
-    <div>
-      Welcome {session.user.username}
+  return (
+    <>
       <LogoutButton />
-    </div>
-  );
+      <ChatShell currentUserId={session.user.id}/>;
+    </>
+  )
 }
