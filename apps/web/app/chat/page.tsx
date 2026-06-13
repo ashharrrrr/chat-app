@@ -19,7 +19,7 @@ export default async function ChatPage() {
   return (
     <>
       <LogoutButton />
-      <ChatShell currentUserId={session.user.id}/>;
+      <ChatShell currentUserId={session.user.id}/>
     </>
   )
 }

@@ -41,18 +41,19 @@ export default function NewConversationForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="border-b p-4">
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="border-b border-gray-700 bg-gray-800 p-4">
       <div className="flex gap-2">
         <input
           {...register("username")}
           placeholder="Start chat by username..."
-          className="flex-1 rounded-lg border px-3 py-2 outline-none"
+          className="flex-1 rounded-lg border border-gray-700 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-500"
         />
         <button
           type="submit"
           disabled={createConversationMutation.isPending}
-          className="rounded-lg border px-3 py-2 font-medium"
-        >
+          className="rounded-lg bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50">
           {createConversationMutation.isPending ? "Creating..." : "New Chat"}
         </button>
       </div>
