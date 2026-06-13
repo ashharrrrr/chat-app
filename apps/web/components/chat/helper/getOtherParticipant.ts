@@ -1,13 +1,11 @@
+import type { Conversation, ConversationParticipant } from "@chat/shared-types";
+
 export default function getOtherParticipant(
-  conversation: any,
+  conversation: Conversation,
   currentUserId: string
 ) {
-  console.log("OTHER USER", conversation.participants.find(
-    (participant: any) =>
-      participant._id !==
-      currentUserId))
   return conversation.participants.find(
-    (participant: any) =>
+    (participant: ConversationParticipant) =>
       participant._id !==
       currentUserId
   );

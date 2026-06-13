@@ -46,10 +46,12 @@ export default function ConversationList({
           {
             console.log("conversation", conversation);
           }
-          const otherParticipant = getOtherParticipant(
+          const otherParticipantFetch = getOtherParticipant(
             conversation,
             currentUserId,
-          ).username;
+          );
+
+          const otherParticipant  =  otherParticipantFetch?.username ??  "Unknown";
 
           return (
             <button
