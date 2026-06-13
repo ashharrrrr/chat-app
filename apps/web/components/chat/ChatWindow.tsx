@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 import { useMessages } from "@/hooks/useMessages";
 
 import MessageComposer from "./MessageComposer";
@@ -13,7 +15,14 @@ export default function ChatWindow({
   conversationId,
   currentUserId,
 }: ChatWindowProps) {
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
   const { data, isPending, isError } = useMessages(conversationId ?? undefined);
+
+  useEffect(() =>  {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [data])
 
   if (!conversationId) {
     return (
@@ -24,8 +33,8 @@ export default function ChatWindow({
   }
 
   return (
-    <main className="flex flex-1 flex-col bg-gray-900">
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+    <main className="w-4xl flex flex-1 flex-col bg-gray-900">
+      <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-3">
         {isPending && <p className="text-gray-400">Loading messages...</p>}
 
         {isError && <p className="text-gray-400">Failed to load messages</p>}
@@ -45,6 +54,7 @@ export default function ChatWindow({
         ">
                 <p
                   className={`
+                    mt-1 truncate
             text-xs
             text-muted-foreground
             ${isMine ? "text-right pe-5" : ""}
@@ -74,6 +84,7 @@ export default function ChatWindow({
             </div>
           );
         })}
+      <div ref={messagesEndRef} />
       </div>
 
       <MessageComposer conversationId={conversationId} />

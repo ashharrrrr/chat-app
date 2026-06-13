@@ -125,7 +125,14 @@ export async function GET(){
 
     const conversations = await Conversation.find({
       participants: session.user.id,
-    }).populate("participants", "username image").sort({ updatedAt: -1, });
+    }).populate("participants", "username image").sort({ updatedAt: -1, }).populate({
+      path: "lastMessage",
+      select: "content  senderId createdAt",
+      populate: {
+        path: "senderId",
+        select: "username"
+      },
+    });
 
     return NextResponse.json(conversations);
 

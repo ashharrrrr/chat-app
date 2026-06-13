@@ -55,12 +55,34 @@ export default function ConversationList({
             <button
               key={conversation._id}
               onClick={() => onSelect(conversation._id)}
-              className={`w-full border-b border-gray-700 p-4 text-left transition-colors ${
-                selectedConversationId === conversation._id
-                  ? "bg-gray-700"
-                  : "hover:bg-gray-700/50"
-              }`}>
-              <p className="font-medium text-white">{otherParticipant}</p>
+              className={`
+    w-full
+    border-b
+    p-4
+    text-left
+    hover:bg-muted/50
+    ${selectedConversationId === conversation._id ? "bg-muted" : ""}
+  `}
+            >
+              <p className="font-medium">{otherParticipant}</p>
+
+              <p
+                className="
+      mt-1
+      truncate
+      text-sm
+      text-muted-foreground
+    "
+              >
+                {conversation.lastMessage
+                  ? `${
+                      String(conversation.lastMessage.senderId._id) ===
+                      currentUserId
+                        ? "You"
+                        : conversation.lastMessage.senderId.username
+                    }: ${conversation.lastMessage.content}`
+                  : "No messages yet"}
+              </p>
             </button>
           );
         })}

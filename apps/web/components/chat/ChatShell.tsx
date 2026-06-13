@@ -14,7 +14,7 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
   const [conversationId, setConversationId] = useState<string | null>(null);
 
   return (
-    <div className="mx-auto flex h-[calc(100vh-2rem)] min-w-7xl bg-gray-900">
+    <div className="mx-auto flex h-[calc(100vh-2rem)] w-7xl bg-gray-900">
       <ConversationList
         currentUserId={currentUserId}
         selectedConversationId={conversationId}

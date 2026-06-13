@@ -1,13 +1,3 @@
-export interface Conversation {
-  _id: string;
-  participants: {
-    _id: string;
-    username: string;
-    image?: string;
-  }[];
-  isGroup: boolean;
-}
-
 export interface Message {
   _id: string;
   content: string;
@@ -17,4 +7,37 @@ export interface Message {
     username: string;
     image ?: string;
   }
+}
+
+export interface ConversationParticipant {
+  _id: string;
+  username: string;
+  image?: string;
+}
+
+export interface LastMessage {
+  _id: string;
+
+  content: string;
+
+  createdAt: string;
+
+  senderId: {
+    _id: string;
+    username: string;
+  };
+}
+
+export interface Conversation {
+  _id: string;
+
+  participants: ConversationParticipant[];
+
+  isGroup: boolean;
+
+  createdAt: string;
+
+  updatedAt: string;
+
+  lastMessage?: LastMessage;
 }
