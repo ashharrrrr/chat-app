@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 import { toast } from "sonner";
-import { compare } from "bcryptjs";
 
 import { loginSchema, type LoginInput } from "@chat/shared-types";
 
@@ -15,14 +14,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 export default function LoginPage() {
 
 
-  async function comparePass(){
-  const hash =
-    "$2b$12$a/K1GhabnYaNywlLBFz/2uJUOkHtZQ4WbUkmDThoxS0YXxe4FLWzy";
-    const result = await compare("password123", hash);
-    console.log("COMPARE", result)
-  }
-  
-  comparePass();
   const router = useRouter();
 
   const {
