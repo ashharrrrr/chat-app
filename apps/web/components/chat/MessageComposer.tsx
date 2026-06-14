@@ -13,6 +13,7 @@ import {
   type MessageContentInput,
 } from "@chat/shared-types";
 
+import { useChatSocket } from "@/providers/SocketProvider";
 import { useSendMessage } from "@/hooks/useSendMessage";
 
 interface MessageComposerProps {
@@ -22,6 +23,7 @@ interface MessageComposerProps {
 export default function MessageComposer({
   conversationId,
 }: MessageComposerProps) {
+  const socket = useChatSocket();
   const sendMessageMutation = useSendMessage();
 
   const {
@@ -42,7 +44,7 @@ export default function MessageComposer({
   }, [errors]);
 
   async function onSubmit(data: MessageContentInput) {
-    sendMessageMutation.mutate(
+    const message = await sendMessageMutation.mutateAsync(
       {
         conversationId,
         content: data.content,
@@ -53,6 +55,13 @@ export default function MessageComposer({
         },
       },
     );
+
+    socket?.emit("message:send",  {
+      conversationId,
+      message,
+    });
+
+    reset();
   }
 
   return (

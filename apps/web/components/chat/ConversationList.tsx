@@ -66,7 +66,7 @@ export default function ConversationList({
     ${selectedConversationId === conversation._id ? "bg-muted" : ""}
   `}
             >
-              <p className="font-medium">{otherParticipant}</p>
+              <p className="font-bold">{otherParticipant}</p>
 
               <p
                 className="
@@ -74,15 +74,16 @@ export default function ConversationList({
       truncate
       text-sm
       text-muted-foreground
+      font-extralight
     "
               >
                 {conversation.lastMessage
                   ? `${
                       String(conversation.lastMessage.senderId._id) ===
                       currentUserId
-                        ? "You"
-                        : conversation.lastMessage.senderId.username
-                    }: ${conversation.lastMessage.content}`
+                        ? "You: "
+                        : "" 
+                    } ${conversation.lastMessage.content}`
                   : "No messages yet"}
               </p>
             </button>
