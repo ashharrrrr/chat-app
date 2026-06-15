@@ -168,7 +168,11 @@ importers:
         specifier: ^5
         version: 5.9.2
 
-  packages/db: {}
+  packages/db:
+    dependencies:
+      mongoose:
+        specifier: ^9.6.3
+        version: 9.6.3
 
   packages/eslint-config:
     devDependencies:

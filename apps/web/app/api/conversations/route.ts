@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 import { connectDB, User, Conversation } from "@chat/db";
+//import User from "../../../../../packages/db/src/models/User"
+//import Conversation from "../../../../../packages/db/src/models/Conversation"
 
 import { createConversationSchema } from "@chat/shared-types";
 
