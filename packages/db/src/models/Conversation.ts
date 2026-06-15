@@ -1,6 +1,6 @@
-import mongoose, { Schema, Types, Document } from "mongoose";
+import mongoose, { Schema, Types, type Model } from "mongoose";
 
-export interface IConversation extends Document {
+export interface IConversation {
   participants: Types.ObjectId[]
   isGroup: boolean;
   name?: string;
@@ -32,4 +32,6 @@ const ConversationSchema = new Schema<IConversation>(
   }
 );
 
-export default mongoose.models.Conversation || mongoose.model<IConversation>("Conversation", ConversationSchema);
+const Conversation: Model<IConversation> = (mongoose.models.Conversation as Model<IConversation>) ?? mongoose.model<IConversation>("Conversation", ConversationSchema);
+
+export default Conversation;
