@@ -59,7 +59,7 @@ export function useSendMessage(){
 
       queryClient.setQueryData(
         ["messages", variables.conversationId],
-        (old: typeof previousMessages | undefined ) => [...((old as any[]) ?? []), optimisticMessage ]);
+        (old: typeof previousMessages | undefined ) => [...((old as Message[]) ?? []), optimisticMessage ]);
 
       return { previousMessages };
     },
