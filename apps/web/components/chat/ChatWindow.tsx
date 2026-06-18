@@ -39,7 +39,7 @@ export default function ChatWindow({
 
         {isError && <p className="text-gray-400">Failed to load messages</p>}
         {data?.map((message) => {
-          const isMine = String(message.senderId._id) === currentUserId;
+          const isMine = String(message.senderId._id) === currentUserId || String(message.senderId._id) === "optimistic";
 
           return (
             <div
@@ -69,9 +69,17 @@ export default function ChatWindow({
             py-2
             wrap-break-word 
             ${isMine ? "bg-blue-600" : "bg-gray-300 text-black"}
+            ${message.optimistic ? "opacity-60" : ""}
           `}>
                   {message.content}
                 </div>
+                {
+                  message.optimistic && (
+                    <p className="text-xs text-muted-foreground">
+                      Sending...
+                    </p>
+                  )
+                }
                 <p
                   className={`
     text-[10px]

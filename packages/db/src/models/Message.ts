@@ -30,6 +30,6 @@ const MessageSchema = new Schema<IMessage>(
   }
 );
 
-const Message: Model<IMessage> = (mongoose.models.Conversation as Model<IMessage>) ?? mongoose.model<IMessage>("Message", MessageSchema);
+const Message: Model<IMessage> = (mongoose.models.Message as Model<IMessage>) ?? mongoose.model<IMessage>("Message", MessageSchema);
 
 export default Message;

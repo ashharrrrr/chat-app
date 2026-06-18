@@ -7,6 +7,8 @@ export interface Message {
     username: string;
     image ?: string;
   }
+
+  optimistic?: boolean,
 }
 
 export interface ConversationParticipant {
