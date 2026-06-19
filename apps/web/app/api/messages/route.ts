@@ -75,6 +75,8 @@ export async function POST(req: Request) {
       content,
     });
 
+    await message.populate("senderId", "username image");
+
     conversation.lastMessage = message._id;
 
     await conversation.save();

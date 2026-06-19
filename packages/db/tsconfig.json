@@ -1,6 +1,8 @@
 {
   "extends": "../typescript-config/base.json",
   "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
     "incremental": true,
     "types": ["node"],
     "composite": true
