@@ -34,7 +34,7 @@ export default function ConversationList({
   }
 
   return (
-    <aside className="w-80 border-r border-gray-700 bg-gray-800 overflow-y-auto flex flex-col">
+    <aside className="min-w-80 border-r border-gray-700 bg-gray-800 overflow-y-auto flex flex-col">
       <div className="border-b border-gray-700 p-4">
         <h2 className="text-lg font-semibold text-white">Conversations</h2>
       </div>
