@@ -1,30 +1,32 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-
 import { useMessages } from "@/hooks/useMessages";
-
 import MessageComposer from "./MessageComposer";
+import type { Conversation } from "@chat/shared-types";
+
+import ProfileAvatar from "@/components/profile/ProfileAvatar";
+import getOtherParticipant from "./helper/getOtherParticipant";
 
 interface ChatWindowProps {
-  conversationId: string | null;
+  conversation?: Conversation;
   currentUserId: string;
 }
 
 export default function ChatWindow({
-  conversationId,
+  conversation,
   currentUserId,
 }: ChatWindowProps) {
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const { data, isPending, isError } = useMessages(conversationId ?? undefined);
+  const { data, isPending, isError } = useMessages(conversation?._id ?? undefined);
 
-  useEffect(() =>  {
+  useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [data])
 
-  if (!conversationId) {
+  if (!conversation) {
     return (
       <main className="flex flex-1 items-center justify-center bg-gray-900">
         <p className="text-gray-400">Select a conversation to start chatting</p>
@@ -32,8 +34,21 @@ export default function ChatWindow({
     );
   }
 
+  const otherUser = getOtherParticipant(conversation, currentUserId)
+
   return (
     <main className="w-4xl flex flex-1 flex-col bg-gray-900">
+      <div className="border-b p-4">
+        <div className="flex items-center gap-3">
+          <ProfileAvatar name={otherUser.username} image={otherUser.image} size="sm" />
+          <div>
+            <p className="font-semibold">{otherUser.username}</p>
+            <p className="text-sm text-muted-foreground">
+              {otherUser.about || " "}
+            </p>
+          </div>
+        </div>
+      </div>
       <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-3">
         {isPending && <p className="text-gray-400">Loading messages...</p>}
 
@@ -44,9 +59,8 @@ export default function ChatWindow({
           return (
             <div
               key={message._id}
-              className={`mb-4 flex ${
-                isMine ? "justify-end" : "justify-start"
-              }`}>
+              className={`mb-4 flex ${isMine ? "justify-end" : "justify-start"
+                }`}>
               <div
                 className="
           max-w-[70%]
@@ -92,10 +106,10 @@ export default function ChatWindow({
             </div>
           );
         })}
-      <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} />
       </div>
 
-      <MessageComposer conversationId={conversationId} />
+      <MessageComposer conversationId={conversation._id} />
     </main>
   );
 }

@@ -1,21 +1,27 @@
 "use client";
 
-import { useConversations } from "@/hooks/useConversations";
 import getOtherParticipant from "./helper/getOtherParticipant";
 import NewConversationForm from "./NewConversationForm";
+import ProfileAvatar from "@/components/profile/ProfileAvatar";
+import type { Conversation } from "@chat/shared-types";
 
 interface ConversationListProps {
+  conversations: Conversation[];
+  isPending: boolean;
+  isError: boolean;
   currentUserId: string;
   selectedConversationId: string | null;
   onSelect: (conversationId: string) => void;
 }
 
 export default function ConversationList({
+  conversations,
+  isPending,
+  isError,
   selectedConversationId,
   onSelect,
   currentUserId,
 }: ConversationListProps) {
-  const { data, isPending, isError } = useConversations();
 
   if (isPending) {
     return (
@@ -42,7 +48,7 @@ export default function ConversationList({
       <NewConversationForm />
 
       <div className="flex-1 overflow-y-auto">
-        {data?.map((conversation) => {
+        {conversations?.map((conversation) => {
           {
             console.log("conversation", conversation);
           }
@@ -51,7 +57,7 @@ export default function ConversationList({
             currentUserId,
           );
 
-          const otherParticipant  =  otherParticipantFetch?.username ??  "Unknown";
+          const otherParticipant = otherParticipantFetch?.username ?? "Unknown";
 
           return (
             <button
@@ -66,26 +72,34 @@ export default function ConversationList({
     ${selectedConversationId === conversation._id ? "bg-muted" : ""}
   `}
             >
-              <p className="font-bold">{otherParticipant}</p>
+              <div className="flex items-center gap-3">
+                <ProfileAvatar
+                  name={otherParticipant}
+                  image={otherParticipantFetch?.image}
+                  size="sm"
+                />
+                <div>
+                <p className="font-bold">{otherParticipant}</p>
 
-              <p
-                className="
+                <p
+                  className="
       mt-1
       truncate
       text-sm
       text-muted-foreground
       font-extralight
     "
-              >
-                {conversation.lastMessage
-                  ? `${
-                      String(conversation.lastMessage.senderId._id) ===
+                >
+                  {conversation.lastMessage
+                    ? `${String(conversation.lastMessage.senderId._id) ===
                       currentUserId
-                        ? "You: "
-                        : "" 
+                      ? "You: "
+                      : ""
                     } ${conversation.lastMessage.content}`
-                  : "No messages yet"}
-              </p>
+                    : "No messages yet"}
+                </p>
+                </div>
+                </div>
             </button>
           );
         })}
