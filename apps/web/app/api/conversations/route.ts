@@ -5,7 +5,6 @@ import { auth } from "@/auth";
 import { connectDB, User, Conversation } from "@chat/db";
 
 import { createConversationSchema } from "@chat/shared-types";
-import mongoose from "mongoose";
 
 export async function POST(req: Request) {
   try {
