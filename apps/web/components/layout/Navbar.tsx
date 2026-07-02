@@ -32,6 +32,7 @@ export default async function Navbar() {
                 Chats
               </Link>
 
+              <Link href="/settings/profile">Profile</Link>
               <LogoutButton />
             </>
           ) : (

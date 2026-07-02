@@ -7,6 +7,7 @@ import type { Conversation } from "@chat/shared-types";
 
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import getOtherParticipant from "./helper/getOtherParticipant";
+import Link from "next/link";
 
 interface ChatWindowProps {
   conversation?: Conversation;
@@ -40,6 +41,15 @@ export default function ChatWindow({
     <main className="w-4xl flex flex-1 flex-col bg-gray-900">
       <div className="border-b p-4">
         <div className="flex items-center gap-3">
+          <Link href={`/u/${otherUser.username}`}
+            className="flex
+    items-center
+    gap-3
+    rounded-lg
+    p-2
+    transition-colors
+    hover:bg-muted"
+    >
           <ProfileAvatar name={otherUser.username} image={otherUser.image} size="sm" />
           <div>
             <p className="font-semibold">{otherUser.username}</p>
@@ -47,6 +57,7 @@ export default function ChatWindow({
               {otherUser.about || " "}
             </p>
           </div>
+      </Link>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-3">

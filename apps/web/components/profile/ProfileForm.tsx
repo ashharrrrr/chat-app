@@ -73,9 +73,9 @@ export default function ProfileForm({ initialUser }: ProfileFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="mx-auto w-full max-w-2xl rounded-2xl border bg-background p-6 shadow-sm"
+      className="mx-auto w-full max-w-2xl bg-gray-800 shadow-lg rounded-lg p-6"
     >
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
         <ProfileAvatar
           name={initialUser.username}
           image={avatarSrc}
@@ -83,7 +83,7 @@ export default function ProfileForm({ initialUser }: ProfileFormProps) {
         />
 
         <div>
-          <label className="inline-flex cursor-pointer items-center rounded-lg border px-4 py-2 text-sm font-medium hover:bg-muted">
+          <label className="inline-flex cursor-pointer items-center rounded-md border border-gray-700 bg-gray-700 px-4 py-2 text-sm font-medium text-white hover:bg-gray-600 transition-colors">
             Change photo
             <input
               type="file"
@@ -99,22 +99,24 @@ export default function ProfileForm({ initialUser }: ProfileFormProps) {
             />
           </label>
 
-          <p className="mt-2 text-xs text-muted-foreground">
+          <p className="mt-2 text-sm text-gray-400">
             JPG, PNG, and WebP supported.
           </p>
         </div>
       </div>
 
       <div className="mt-6">
-        <label className="mb-2 block text-sm font-medium">About</label>
+        <label className="mb-2 block text-sm font-medium text-gray-200">
+          About
+        </label>
         <textarea
           {...register("about")}
           rows={5}
           placeholder="Write something about yourself..."
-          className="w-full rounded-xl border bg-background px-4 py-3 outline-none ring-0 focus:border-primary"
+          className="w-full rounded-md border border-gray-700 bg-gray-700 px-3 py-2 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-500"
         />
         {errors.about && (
-          <p className="mt-2 text-sm text-red-500">{errors.about.message}</p>
+          <p className="mt-2 text-sm text-red-400">{errors.about.message}</p>
         )}
       </div>
 
@@ -122,7 +124,7 @@ export default function ProfileForm({ initialUser }: ProfileFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="rounded-xl border px-4 py-2 font-medium hover:bg-muted disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-indigo-600 px-5 py-2.5 font-medium text-white hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSubmitting ? "Saving..." : "Save profile"}
         </button>
