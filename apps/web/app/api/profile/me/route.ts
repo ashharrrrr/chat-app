@@ -1,7 +1,7 @@
 import { auth } from "@/auth";
 import { connectDB, User } from "@chat/db";
 import { updateProfileSchema } from "@chat/shared-types";
-import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { getSupabaseAdmin } from "@/lib/supabaseAdmin";
 import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
@@ -31,6 +31,8 @@ export async function PUT(req: Request) {
     if (!session?.user?.id) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     const formData = await req.formData();
     const aboutRaw = formData.get("about");
