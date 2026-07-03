@@ -7,13 +7,22 @@ import ChatWindow from "./ChatWindow";
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useChatSocket } from "@/providers/SocketProvider";
+import { useConversations } from "@/hooks/useConversations";
 
 interface ChatShellProps {
   currentUserId: string;
 }
 
 export default function ChatShell({ currentUserId }: ChatShellProps) {
+  
+  const { data: conversations = [], isPending, isError } = useConversations();
+
+
   const [conversationId, setConversationId] = useState<string | null>(null);
+
+  const selectedConversation = conversations.find(
+    (conversation) => conversation._id === conversationId
+  )
 
   const socket = useChatSocket();
   const queryClient  = useQueryClient();
@@ -53,12 +62,15 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
   return (
     <div className="mx-auto mt-3 flex h-[calc(100vh-6rem)] w-7xl bg-gray-900">
       <ConversationList
+        conversations={conversations}
+        isPending={isPending}
+        isError={isError}
         currentUserId={currentUserId}
         selectedConversationId={conversationId}
         onSelect={setConversationId}
       />
 
-      <ChatWindow conversationId={conversationId} currentUserId={currentUserId}/>
+      <ChatWindow conversation={selectedConversation} currentUserId={currentUserId}/>
     </div>
   );
 }
