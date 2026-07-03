@@ -53,9 +53,6 @@ export default function ChatWindow({
           <ProfileAvatar name={otherUser.username} image={otherUser.image} size="sm" />
           <div>
             <p className="font-semibold">{otherUser.username}</p>
-            <p className="text-sm text-muted-foreground">
-              {otherUser.about || " "}
-            </p>
           </div>
       </Link>
         </div>
