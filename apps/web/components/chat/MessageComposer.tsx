@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+import { Image, X } from "lucide-react";
 
 import { toast } from "sonner";
 
@@ -26,6 +27,44 @@ export default function MessageComposer({
   const socket = useChatSocket();
   const sendMessageMutation = useSendMessage();
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!selectedImage) {
+      setPreviewUrl(null);
+      return;
+    }
+
+    const objectUrl = URL.createObjectURL(selectedImage);
+
+    setPreviewUrl(objectUrl);
+
+    return () => {
+      URL.revokeObjectURL(objectUrl);
+    }
+  }, [selectedImage]);
+
+  function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    setSelectedImage(file);
+  }
+
+  function clearImage() {
+
+    setSelectedImage(null);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  }
+
   const {
     register,
     handleSubmit,
@@ -44,6 +83,7 @@ export default function MessageComposer({
   }, [errors]);
 
   async function onSubmit(data: MessageContentInput) {
+    console.log(selectedImage);
     const message = await sendMessageMutation.mutateAsync(
       {
         conversationId,
@@ -56,7 +96,7 @@ export default function MessageComposer({
       },
     );
 
-    socket?.emit("message:send",  {
+    socket?.emit("message:send", {
       conversationId,
       message,
     });
@@ -68,12 +108,56 @@ export default function MessageComposer({
     <form
       onSubmit={handleSubmit(onSubmit)}
       className="border-t border-gray-700 bg-gray-800 p-4">
+      {previewUrl && (
+        <div
+          className="
+      relative
+      mb-3
+      w-fit
+    "
+        >
+          <img
+            src={previewUrl}
+            alt="Preview"
+            className="
+        h-28
+        w-28
+        rounded-xl
+        border
+        object-cover
+      "
+          />
+
+          <button
+            type="button"
+            onClick={clearImage}
+            className="
+        absolute
+        right-2
+        top-2
+        rounded-full
+        bg-black/70
+        p-1
+        text-white
+        transition
+        hover:bg-black
+      "
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+      )}
+
       <div className="flex gap-2">
         <input
           {...register("content")}
           placeholder="Type a message..."
           className="flex-1 rounded-lg border border-gray-700 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-500"
         />
+
+        <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-md p-2 hover:bg-muted transition-colors">
+          <Image className="h-5 w-5" />
+        </button>
 
         <button
           type="submit"
@@ -82,6 +166,8 @@ export default function MessageComposer({
           {sendMessageMutation.isPending ? "Sending..." : "Send"}
         </button>
       </div>
+      <input ref={fileInputRef} type="file" accept="image/*" hidden onChange={handleImageChange} />
     </form>
   );
 }
+
