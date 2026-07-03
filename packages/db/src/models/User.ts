@@ -9,18 +9,19 @@ export interface IUser {
 }
 
 const UserSchema = new Schema<IUser>(
-
   {
     username:{
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
 
     email: {
       type: String,
       required: true,
       unique: true,
+      trim: true,
     },
 
     password: {
@@ -28,11 +29,15 @@ const UserSchema = new Schema<IUser>(
       required: true,
     },
 
-    image: String,
+    image: {
+      type: String,
+      default: "",
+    },
 
     about: {
       type: String,
       default: "",
+      trim: true,
     },
   },
   {

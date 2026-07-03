@@ -14,6 +14,7 @@ export interface Message {
 export interface ConversationParticipant {
   _id: string;
   username: string;
+  about: string;
   image?: string;
 }
 
