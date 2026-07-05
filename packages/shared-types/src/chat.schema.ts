@@ -6,7 +6,11 @@ export const createConversationSchema = z.object({
 
 export const sendMessageSchema = z.object({
   conversationId: z.string().min(1, "Conversation ID is required"),
-  content: z.string().trim().min(1, "Message cannot be empty").max(2000, "Message is too long"),
+  content: z.string().trim(),
+  hasImage: z.boolean(),
+}).refine(({ content, hasImage }) => content.length > 0 || hasImage, {
+  message: "Message cannot be empty.",
+  path: ["content"],
 });
 
 export const messageContentSchema = z.object({

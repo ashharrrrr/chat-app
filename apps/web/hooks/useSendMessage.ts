@@ -16,19 +16,35 @@ type MutationContext = {
 type SendMessageVariables = {
   conversationId: string;
   content: string;
+  image?: File | null;
 }
 
-export function useSendMessage(){
+export function useSendMessage() {
+
   const queryClient = useQueryClient();
 
-  return useMutation<ChatSocketMessage, Error, SendMessageVariables, MutationContext>({
-    mutationFn: (data) => api<ChatSocketMessage>("/api/messages", {
+  function postMessage(data: SendMessageVariables) {
+    const formData = new FormData();
+
+    formData.append("conversationId", data.conversationId)
+
+    formData.append("content", data.content)
+
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+
+    return api<ChatSocketMessage>("/api/messages", {
       method: "POST",
+      body: formData,
+    },
+    )
+  }
 
-      body: JSON.stringify(data),
-    }),
+  return useMutation<ChatSocketMessage, Error, SendMessageVariables, MutationContext>({
+    mutationFn: postMessage,
 
-    async onMutate( variables ) {
+    async onMutate(variables) {
       await queryClient.cancelQueries({
         queryKey: [
           "messages",
@@ -59,14 +75,14 @@ export function useSendMessage(){
 
       queryClient.setQueryData(
         ["messages", variables.conversationId],
-        (old: typeof previousMessages | undefined ) => [...((old as Message[]) ?? []), optimisticMessage ]);
+        (old: typeof previousMessages | undefined) => [...((old as Message[]) ?? []), optimisticMessage]);
 
       return { previousMessages };
     },
 
-    onSuccess(_message, variables){
+    onSuccess(_message, variables) {
       queryClient.invalidateQueries({
-        queryKey:["messages", variables.conversationId],
+        queryKey: ["messages", variables.conversationId],
       });
 
       queryClient.invalidateQueries({
@@ -74,9 +90,9 @@ export function useSendMessage(){
       });
     },
 
-    onError(error, variables, context){
+    onError(error, variables, context) {
       queryClient.setQueryData(
-        ["messages", variables.conversationId], 
+        ["messages", variables.conversationId],
         context?.previousMessages
       );
       toast.error(error.message);

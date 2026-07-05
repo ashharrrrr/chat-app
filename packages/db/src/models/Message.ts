@@ -4,6 +4,7 @@ export interface IMessage {
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
   content: string;
+  image?: string;
 }
 
 const MessageSchema = new Schema<IMessage>(
@@ -20,9 +21,12 @@ const MessageSchema = new Schema<IMessage>(
     },
     content: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
       maxLength: 2000,
+    },
+    image: {
+      type: String,
     },
   },
   {

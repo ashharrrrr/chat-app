@@ -88,9 +88,11 @@ export default function MessageComposer({
       {
         conversationId,
         content: data.content,
+        image: selectedImage,
       },
       {
         onSuccess() {
+          setSelectedImage(null);
           reset();
         },
       },

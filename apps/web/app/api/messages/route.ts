@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 import { connectDB, Conversation, Message } from "@chat/db";
+import { uploadChatImages } from "../../../lib/supbase/chatImages"
 
 import { sendMessageSchema } from "@chat/shared-types";
 import { Types } from "mongoose";
@@ -22,10 +23,16 @@ export async function POST(req: Request) {
         }
       );
     }
+    const formData = await req.formData();
 
-    const body = await req.json();
+    const image = formData.get("image");
 
-    const result = sendMessageSchema.safeParse(body);
+    const result = sendMessageSchema.safeParse({
+      conversationId: formData.get("conversationId"),
+      content: formData.get("content"),
+      hasImage: image instanceof File,
+    });
+
 
     if (!result.success) {
       return NextResponse.json(
@@ -38,7 +45,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { conversationId, content } = result.data;
+    const { conversationId, content } = result.data
 
     await connectDB();
 
@@ -69,10 +76,20 @@ export async function POST(req: Request) {
       );
     }
 
+    let imagePath: string | undefined;
+
+    if (image instanceof File) {
+      imagePath = await uploadChatImages(
+        image,
+        conversationId,
+      );
+    }
+
     const message = await Message.create({
       conversationId,
       senderId: session.user.id,
       content,
+      image: imagePath,
     });
 
     await message.populate("senderId", "username image");
@@ -107,7 +124,7 @@ export async function POST(req: Request) {
 
 
 export async function GET(req: Request) {
-  try{
+  try {
 
     const session = await auth();
 
@@ -122,11 +139,11 @@ export async function GET(req: Request) {
       );
     }
 
-    const { searchParams }= new URL(req.url);
+    const { searchParams } = new URL(req.url);
 
     const conversationId = searchParams.get("conversationId");
 
-    if(!conversationId) {
+    if (!conversationId) {
       return NextResponse.json(
         {
           message: "Conversation ID is required!!!"

@@ -13,6 +13,7 @@ export interface ChatSocketMessage {
   _id: string;
   conversationId: string;
   content: string;
+  image?: string;
   senderId: ChatSocketSender;
   createdAt: string;
   updatedAt: string;
