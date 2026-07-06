@@ -5,6 +5,9 @@ export interface IMessage {
   senderId: Types.ObjectId;
   content: string;
   image?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const MessageSchema = new Schema<IMessage>(

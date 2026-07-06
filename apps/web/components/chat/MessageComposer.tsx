@@ -69,6 +69,7 @@ export default function MessageComposer({
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm<MessageContentInput>({
     resolver: zodResolver(messageContentSchema),
@@ -83,27 +84,39 @@ export default function MessageComposer({
   }, [errors]);
 
   async function onSubmit(data: MessageContentInput) {
-    console.log(selectedImage);
-    const message = await sendMessageMutation.mutateAsync(
-      {
+
+    if (!data.content.trim() && !selectedImage) {
+      setError("content", {
+        type: "manual",
+        message: "Message cannot be empty",
+      })
+      return;
+    }
+
+    try {
+      const image = selectedImage;
+
+      setSelectedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+
+      const message = await sendMessageMutation.mutateAsync(
+        {
+          conversationId,
+          content: data.content,
+          image,
+        });
+
+      reset();
+
+      socket?.emit("message:send", {
         conversationId,
-        content: data.content,
-        image: selectedImage,
-      },
-      {
-        onSuccess() {
-          setSelectedImage(null);
-          reset();
-        },
-      },
-    );
-
-    socket?.emit("message:send", {
-      conversationId,
-      message,
-    });
-
-    reset();
+        message,
+      });
+    } catch {
+      // this shit is empty cuz imma just handle the error in useSendMessage()
+    }
   }
 
   return (
@@ -157,7 +170,7 @@ export default function MessageComposer({
           className="flex-1 rounded-lg border border-gray-700 bg-gray-700 px-4 py-2 text-white placeholder-gray-400 outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
-        <button type="button" onClick={() => fileInputRef.current?.click()} className="rounded-md p-2 hover:bg-muted transition-colors">
+        <button type="button" disabled={sendMessageMutation.isPending} onClick={() => fileInputRef.current?.click()} className="rounded-md p-2 hover:bg-muted transition-colors disabled:opacity-50">
           <Image className="h-5 w-5" />
         </button>
 

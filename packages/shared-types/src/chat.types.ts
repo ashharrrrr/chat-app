@@ -1,13 +1,13 @@
 export interface Message {
   _id: string;
   content: string;
+  image?: string | null;
   createdAt: string;
   senderId: {
     _id: string;
     username: string;
     image ?: string;
   }
-
   optimistic?: boolean,
 }
 
@@ -20,14 +20,14 @@ export interface ConversationParticipant {
 
 export interface LastMessage {
   _id: string;
-
   content: string;
+  image?: string | null;
 
   createdAt: string;
-
   senderId: {
     _id: string;
     username: string;
+    image?: string | null;
   };
 }
 

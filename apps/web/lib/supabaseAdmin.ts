@@ -1,6 +1,12 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+
+let supabaseAdmin: SupabaseClient | undefined;
 
 export function getSupabaseAdmin() {
+  if (supabaseAdmin) {
+    return supabaseAdmin;
+  }
+
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
 
@@ -12,5 +18,7 @@ export function getSupabaseAdmin() {
     throw new Error("SUPABASE_SECRET_KEY is not defined");
   }
 
-  return createClient(url, key);
+  supabaseAdmin = createClient(url, key);
+
+  return supabaseAdmin;
 }

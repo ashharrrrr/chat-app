@@ -1,9 +1,10 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 import { auth } from "@/auth";
 
 import { connectDB, Conversation, Message } from "@chat/db";
-import { uploadChatImages } from "../../../lib/supbase/chatImages"
+import { uploadChatImages, createSignedChatImageUrl, createSignedChatImageUrls } from "../../../lib/supbase/chatImages"
 
 import { sendMessageSchema } from "@chat/shared-types";
 import { Types } from "mongoose";
@@ -33,8 +34,8 @@ export async function POST(req: Request) {
       hasImage: image instanceof File,
     });
 
-
     if (!result.success) {
+      console.log("zod error", z.formatError(result.error));
       return NextResponse.json(
         {
           message: result.error.issues[0]?.message ?? "Invalid input",
@@ -95,11 +96,29 @@ export async function POST(req: Request) {
     await message.populate("senderId", "username image");
 
     conversation.lastMessage = message._id;
-
     await conversation.save();
 
+    const messageObject = message.toObject()
+
+    let imageUrl = messageObject.image;
+
+    if (imageUrl) {
+      try {
+        imageUrl = await createSignedChatImageUrl(imageUrl);
+      } catch (error) {
+        console.error("Failed to sign", messageObject.image, error);
+
+        imageUrl = undefined;
+      }
+    }
+
+    const response = {
+      ...messageObject,
+      imageUrl,
+    };
+
     return NextResponse.json(
-      message,
+      response,
       {
         status: 201,
       }
@@ -186,7 +205,22 @@ export async function GET(req: Request) {
       conversationId,
     }).populate("senderId", "username image").sort({ createdAt: 1 });
 
-    return NextResponse.json(messages);
+    const imagePaths = messages.map((message) => message.image).filter((image): image is string => Boolean(image));
+
+    const signedUrls = await createSignedChatImageUrls(imagePaths);
+
+    const response = messages.map((message) => {
+      const object = message.toObject();
+
+      return {
+        ...object,
+        image: object.image
+          ? signedUrls.get(object.image)
+          : undefined,
+      };
+    });
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("GET MESSAGES ERROR:", error);
 

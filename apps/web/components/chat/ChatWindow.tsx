@@ -49,12 +49,12 @@ export default function ChatWindow({
     p-2
     transition-colors
     hover:bg-muted"
-    >
-          <ProfileAvatar name={otherUser.username} image={otherUser.image} size="sm" />
-          <div>
-            <p className="font-semibold">{otherUser.username}</p>
-          </div>
-      </Link>
+          >
+            <ProfileAvatar name={otherUser.username} image={otherUser.image} size="sm" />
+            <div>
+              <p className="font-semibold">{otherUser.username}</p>
+            </div>
+          </Link>
         </div>
       </div>
       <div className="flex-1 overflow-y-auto scrollbar-none p-4 space-y-3">
@@ -62,6 +62,7 @@ export default function ChatWindow({
 
         {isError && <p className="text-gray-400">Failed to load messages</p>}
         {data?.map((message) => {
+
           const isMine = String(message.senderId._id) === currentUserId || String(message.senderId._id) === "optimistic";
 
           return (
@@ -93,15 +94,28 @@ export default function ChatWindow({
             ${isMine ? "bg-blue-600" : "bg-gray-300 text-black"}
             ${message.optimistic ? "opacity-60" : ""}
           `}>
-                  {message.content}
-                </div>
-                {
-                  message.optimistic && (
-                    <p className="text-xs text-muted-foreground">
-                      Sending...
+                  {message.image && (
+                    <a
+                      href={message.image}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mb-2 block overflow-hidden rounded-xl"
+                    >
+                      <img
+                        src={message.image}
+                        alt="Shared attachment"
+                        className="max-h-80 w-full rounded-xl object-cover"
+                        loading="lazy"
+                      />
+                    </a>
+                  )}
+
+                  {message.content && (
+                    <p className="whitespace-pre-wrap">
+                      {message.content}
                     </p>
-                  )
-                }
+                  )}
+                </div>
                 <p
                   className={`
     text-[10px]
