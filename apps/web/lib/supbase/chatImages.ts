@@ -1,6 +1,5 @@
 import { getSupabaseAdmin } from "../supabaseAdmin";
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
-const supabaseAdmin = getSupabaseAdmin();
 
 function getChatImagesBucket() {
   const bucket = process.env.SUPABASE_CHAT_IMAGES_BUCKET;
@@ -49,6 +48,7 @@ export async function uploadChatImages(
   );
 
 
+  const supabaseAdmin = getSupabaseAdmin();
   const { error } = await supabaseAdmin.storage
     .from(getChatImagesBucket())
     .upload(
