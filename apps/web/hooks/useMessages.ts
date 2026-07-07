@@ -1,12 +1,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { Message } from "@chat/shared-types"
+import type { ChatSocketMessage } from "@chat/shared-types"
 
 import { api } from "@/lib/api";
 
 export function useMessages(conversationId?: string) {
-  return useQuery<Message[]>({
+  return useQuery<ChatSocketMessage[]>({
     queryKey: [
       "messages",
       conversationId,
@@ -14,6 +14,14 @@ export function useMessages(conversationId?: string) {
 
     enabled: !!conversationId,
 
-    queryFn: () => api<Message[]>(`api/messages?conversationId=${conversationId}`),
+    queryFn: async() => {
+      console.log("FETCHING", conversationId);
+
+    const result = await api<ChatSocketMessage[]>(`api/messages?conversationId=${conversationId}`)
+
+    console.log("FETCH FINISHED", result.length)
+
+    return result;
+    }
   });
 }

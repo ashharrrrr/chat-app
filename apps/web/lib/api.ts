@@ -1,11 +1,13 @@
 export async function api<T>(
   input: RequestInfo,
-  init?: RequestInit
+  init?: RequestInit,
 ): Promise<T> {
+  const isFormData = init?.body instanceof FormData;
+
   const response = await fetch(input, {
     ...init,
     headers: {
-      "Content-Type": "application/json",
+      ...(isFormData ? {} : { "Content-Type": "application/json" }),
       ...init?.headers,
     },
   });
@@ -14,10 +16,9 @@ export async function api<T>(
 
   if (!response.ok) {
     throw new Error(
-      data.message ?? "Something went wrong"
+      data.message ?? "Something went wrong",
     );
   }
-
 
   return data;
 }

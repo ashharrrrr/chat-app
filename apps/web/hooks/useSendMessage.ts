@@ -1,82 +1,132 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import { toast } from "sonner";
-
 import { api } from "@/lib/api";
 
 import type { ChatSocketMessage } from "@chat/shared-types";
-import type { Message } from "@chat/shared-types";
 
 type MutationContext = {
-  previousMessages?: Message[];
+  previousMessages?: ChatSocketMessage[];
+  optimisticImageUrl?: string;
 };
 
 type SendMessageVariables = {
   conversationId: string;
   content: string;
+  image?: File | null;
+  clientId: string;
 }
 
-export function useSendMessage(){
+export function useSendMessage() {
+
   const queryClient = useQueryClient();
 
-  return useMutation<ChatSocketMessage, Error, SendMessageVariables, MutationContext>({
-    mutationFn: (data) => api<ChatSocketMessage>("/api/messages", {
+  function postMessage(data: SendMessageVariables) {
+    const formData = new FormData();
+
+    formData.append("conversationId", data.conversationId);
+    formData.append("content", data.content);
+    formData.append("clientId", data.clientId);
+
+    if (data.image) {
+      formData.append("image", data.image);
+    }
+
+    return api<ChatSocketMessage>("/api/messages", {
       method: "POST",
+      body: formData,
+    },
+    )
+  }
 
-      body: JSON.stringify(data),
-    }),
+  return useMutation<ChatSocketMessage, Error, SendMessageVariables, MutationContext>({
+    mutationFn: postMessage,
 
-    async onMutate( variables ) {
-      await queryClient.cancelQueries({
-        queryKey: [
-          "messages",
-          variables.conversationId,
-        ],
-      });
+    async onMutate(variables) {
 
-      const previousMessages = queryClient.getQueryData<Message[]>([
+      const messagesKey = ["messages", variables.conversationId] as const;
+      const hasLoadedMessages =
+        queryClient.getQueryState(messagesKey)?.data !== undefined;
+
+      if (hasLoadedMessages) {
+        await queryClient.cancelQueries({ queryKey: messagesKey });
+      }
+
+      const previousMessages = queryClient.getQueryData<ChatSocketMessage[]>([
         "messages",
         variables.conversationId,
       ]);
 
-      const optimisticMessage = {
-        _id: crypto.randomUUID(),
+      const optimisticImageUrl = variables.image ? URL.createObjectURL(variables.image) : undefined;
+
+      const optimisticMessage: ChatSocketMessage = {
+        _id: variables.clientId,
+        clientId: variables.clientId,
+
+        conversationId: variables.conversationId,
 
         content: variables.content,
+        image: optimisticImageUrl,
 
         createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
 
         optimistic: true,
 
         senderId: {
           _id: "optimistic",
-
           username: "You",
         },
       };
 
-      queryClient.setQueryData(
+      queryClient.setQueryData<ChatSocketMessage[]>(
         ["messages", variables.conversationId],
-        (old: typeof previousMessages | undefined ) => [...((old as Message[]) ?? []), optimisticMessage ]);
+        (old = []) => [...old, optimisticMessage]);
 
-      return { previousMessages };
+      return { previousMessages, optimisticImageUrl };
+    },
+    onSuccess(message, variables) {
+      const queryKey = ["messages", variables.conversationId] as const;
+
+      const state = queryClient.getQueryState(queryKey);
+
+      // If the initial history is still loading,
+      // let it finish and then refetch.
+      if (state?.fetchStatus === "fetching") {
+        queryClient.invalidateQueries({
+          queryKey,
+        });
+
+        return;
+      }
+
+      // Otherwise replace the optimistic message normally.
+      queryClient.setQueryData<ChatSocketMessage[]>(
+        queryKey,
+        (old = []) =>
+          old.map((item) =>
+            item.clientId === message.clientId
+              ? message
+              : item
+          )
+      );
     },
 
-    onSuccess(_message, variables){
-      queryClient.invalidateQueries({
-        queryKey:["messages", variables.conversationId],
-      });
+
+    onSettled(_data, _error, _variables, context) {
+      if (context?.optimisticImageUrl) {
+        URL.revokeObjectURL(context.optimisticImageUrl);
+      }
 
       queryClient.invalidateQueries({
         queryKey: ["conversations"],
       });
     },
 
-    onError(error, variables, context){
+    onError(error, variables, context) {
       queryClient.setQueryData(
-        ["messages", variables.conversationId], 
+        ["messages", variables.conversationId],
         context?.previousMessages
       );
       toast.error(error.message);
