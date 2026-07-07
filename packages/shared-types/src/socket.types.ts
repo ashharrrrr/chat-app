@@ -11,12 +11,14 @@ export interface ChatSocketSender {
 
 export interface ChatSocketMessage {
   _id: string;
+  clientId: string;
   conversationId: string;
   content: string;
   image?: string;
   senderId: ChatSocketSender;
   createdAt: string;
   updatedAt: string;
+  optimistic?: boolean;
 }
 
 export interface MessagePayload {

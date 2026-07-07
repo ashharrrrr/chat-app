@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Image, X } from "lucide-react";
 
 import { toast } from "sonner";
@@ -29,22 +29,20 @@ export default function MessageComposer({
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const previewUrl = useMemo(() => {
+    if (!selectedImage) return null;
+
+    return URL.createObjectURL(selectedImage);
+  }, [selectedImage])
 
   useEffect(() => {
-    if (!selectedImage) {
-      setPreviewUrl(null);
-      return;
-    }
-
-    const objectUrl = URL.createObjectURL(selectedImage);
-
-    setPreviewUrl(objectUrl);
+    if (!previewUrl) return;
 
     return () => {
-      URL.revokeObjectURL(objectUrl);
+      URL.revokeObjectURL(previewUrl);
     }
-  }, [selectedImage]);
+  }, [previewUrl]);
 
   function handleImageChange(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -65,50 +63,59 @@ export default function MessageComposer({
     }
   }
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setError,
-    formState: { errors },
-  } = useForm<MessageContentInput>({
-    resolver: zodResolver(messageContentSchema),
-  });
+  function clearFileInput() {
 
-  useEffect(() => {
-    const firstError = Object.values(errors)[0];
-
-    if (firstError?.message) {
-      toast.error(firstError.message);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
     }
-  }, [errors]);
-
-  async function onSubmit(data: MessageContentInput) {
-
-    if (!data.content.trim() && !selectedImage) {
-      setError("content", {
-        type: "manual",
-        message: "Message cannot be empty",
-      })
-      return;
     }
 
-    try {
-      const image = selectedImage;
+    const {
+      register,
+      handleSubmit,
+      reset,
+      setError,
+      formState: { errors },
+    } = useForm<MessageContentInput>({
+      resolver: zodResolver(messageContentSchema),
+    });
 
-      setSelectedImage(null);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
+    useEffect(() => {
+      const firstError = Object.values(errors)[0];
+
+      if (firstError?.message) {
+        toast.error(firstError.message);
       }
+    }, [errors]);
+
+    async function onSubmit(data: MessageContentInput) {
+
+      if (!data.content.trim() && !selectedImage) {
+        setError("content", {
+          type: "manual",
+          message: "Message cannot be empty",
+        })
+        return;
+      }
+
+      try {
+        const image = selectedImage;
+        const clientId = crypto.randomUUID();
+
+        reset();
+        setSelectedImage(null);
+
+        clearFileInput();
+
 
       const message = await sendMessageMutation.mutateAsync(
         {
+          clientId,
           conversationId,
           content: data.content,
           image,
         });
 
-      reset();
 
       socket?.emit("message:send", {
         conversationId,

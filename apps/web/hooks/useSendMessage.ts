@@ -5,10 +5,9 @@ import { toast } from "sonner";
 import { api } from "@/lib/api";
 
 import type { ChatSocketMessage } from "@chat/shared-types";
-import type { Message } from "@chat/shared-types";
 
 type MutationContext = {
-  previousMessages?: Message[];
+  previousMessages?: ChatSocketMessage[];
   optimisticImageUrl?: string;
 };
 
@@ -16,6 +15,7 @@ type SendMessageVariables = {
   conversationId: string;
   content: string;
   image?: File | null;
+  clientId: string;
 }
 
 export function useSendMessage() {
@@ -25,8 +25,9 @@ export function useSendMessage() {
   function postMessage(data: SendMessageVariables) {
     const formData = new FormData();
 
-    formData.append("conversationId", data.conversationId)
-    formData.append("content", data.content)
+    formData.append("conversationId", data.conversationId);
+    formData.append("content", data.content);
+    formData.append("clientId", data.clientId);
 
     if (data.image) {
       formData.append("image", data.image);
@@ -50,40 +51,58 @@ export function useSendMessage() {
         ],
       });
 
-      const previousMessages = queryClient.getQueryData<Message[]>([
+      const previousMessages = queryClient.getQueryData<ChatSocketMessage[]>([
         "messages",
         variables.conversationId,
       ]);
 
       const optimisticImageUrl = variables.image ? URL.createObjectURL(variables.image) : undefined;
 
-      const optimisticMessage: Message = {
-        _id: crypto.randomUUID(),
+      const optimisticMessage: ChatSocketMessage = {
+        _id: variables.clientId,
+        clientId: variables.clientId,
+
+        conversationId: variables.conversationId,
+
         content: variables.content,
-        createdAt: new Date().toISOString(),
-        optimistic: true,
         image: optimisticImageUrl,
+
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+
+        optimistic: true,
+
         senderId: {
           _id: "optimistic",
           username: "You",
         },
       };
 
-      queryClient.setQueryData<Message[]>(
+      queryClient.setQueryData<ChatSocketMessage[]>(
         ["messages", variables.conversationId],
         (old = []) => [...old, optimisticMessage]);
 
       return { previousMessages, optimisticImageUrl };
     },
 
-    onSettled(_data, _error, variables, context) {
+    onSuccess(message, variables) {
+      console.log("SERVER CLIENT ID: ", message.clientId);
+      queryClient.setQueryData<ChatSocketMessage[]>(
+        ["messages", variables.conversationId],
+        (old = []) => {
+          console.log(old);
+          return old.map((item) => {
+            console.log(item.clientId, message.clientId);
+            return item.clientId === message.clientId ? message : item
+          })
+        }
+      )
+    },
+
+    onSettled(_data, _error, _variables, context) {
       if (context?.optimisticImageUrl) {
         URL.revokeObjectURL(context.optimisticImageUrl);
       }
-
-      queryClient.invalidateQueries({
-        queryKey: ["messages", variables.conversationId],
-      });
 
       queryClient.invalidateQueries({
         queryKey: ["conversations"],

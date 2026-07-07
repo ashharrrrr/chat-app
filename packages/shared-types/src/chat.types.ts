@@ -1,5 +1,6 @@
 export interface Message {
   _id: string;
+  clientId?: string;
   content: string;
   image?: string | null;
   createdAt: string;

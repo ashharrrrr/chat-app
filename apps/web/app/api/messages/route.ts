@@ -27,6 +27,14 @@ export async function POST(req: Request) {
     const formData = await req.formData();
 
     const image = formData.get("image");
+    const clientId = formData.get("clientId");
+
+    if (typeof clientId !== "string") {
+      return NextResponse.json(
+        { message: "Invalid clientId" },
+        { status: 400 },
+      );
+    }
 
     const result = sendMessageSchema.safeParse({
       conversationId: formData.get("conversationId"),
@@ -79,11 +87,23 @@ export async function POST(req: Request) {
 
     let imagePath: string | undefined;
 
+    console.log(image instanceof File);
+
     if (image instanceof File) {
-      imagePath = await uploadChatImages(
-        image,
-        conversationId,
-      );
+      try {
+        console.log(image?.size);
+        console.log(image?.type);
+
+        imagePath = await uploadChatImages(
+          image,
+          conversationId,
+        );
+      } catch (error) {
+        return NextResponse.json(
+          { message: error instanceof Error ? error.message : "Image upload Failed" },
+          { status: 413 },
+        )
+      }
     }
 
     const message = await Message.create({
@@ -100,21 +120,22 @@ export async function POST(req: Request) {
 
     const messageObject = message.toObject()
 
-    let imageUrl = messageObject.image;
+    let signedImageUrl = messageObject.image;
 
-    if (imageUrl) {
+    if (signedImageUrl) {
       try {
-        imageUrl = await createSignedChatImageUrl(imageUrl);
+        signedImageUrl = await createSignedChatImageUrl(signedImageUrl);
       } catch (error) {
         console.error("Failed to sign", messageObject.image, error);
 
-        imageUrl = undefined;
+        signedImageUrl = undefined;
       }
     }
 
     const response = {
       ...messageObject,
-      imageUrl,
+      clientId,
+      image: signedImageUrl,
     };
 
     return NextResponse.json(

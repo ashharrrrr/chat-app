@@ -1,5 +1,4 @@
 import { getSupabaseAdmin } from "../supabaseAdmin";
-
 const SIGNED_URL_TTL_SECONDS = 60 * 60;
 const supabaseAdmin = getSupabaseAdmin();
 
@@ -17,6 +16,9 @@ export async function uploadChatImages(
   conversationId: string,
 ): Promise<string> {
 
+  console.log("ENTER uploadChatImages");
+  console.log("SIZE", image.size);
+
   const ALLOWED_TYPES = [
     "image/jpeg",
     "image/png",
@@ -25,11 +27,19 @@ export async function uploadChatImages(
   if (!ALLOWED_TYPES.includes(image.type)) {
     throw new Error("Unsupported image type.");
   }
+  const MAX_IMAGE_SIZE = 10 * 1024 * 1024;
 
-  const MAX_IMAGE_SIZE = 10 * 1024 * 1024; // 10 MB
+  console.log("SIZE:", image.size);
+  console.log("MAX:", MAX_IMAGE_SIZE);
+  console.log("GREATER?", image.size > MAX_IMAGE_SIZE);
+
   if (image.size > MAX_IMAGE_SIZE) {
+    console.log("THROWING");
     throw new Error("Image exceeds the 10 MB limit.");
   }
+
+  console.log("CONTINUING");
+
 
   const extension = image.name.split(".").pop() ?? "jpg";
   const imagePath = `conversations/${conversationId}/${crypto.randomUUID()}.${extension}`;
@@ -63,7 +73,7 @@ export async function createSignedChatImageUrl(imagePath: string): Promise<strin
 
   const { data, error } = await getSupabaseAdmin().storage.from(getChatImagesBucket()).createSignedUrl(imagePath, SIGNED_URL_TTL_SECONDS);
 
-  if(error) {
+  if (error) {
     console.error("SIGNED URL ERROR", error);
 
     throw new Error(error.message);
@@ -77,7 +87,7 @@ export async function createSignedChatImageUrls(imagePaths: string[]): Promise<M
     return new Map();
   }
 
-  const { data, error } = await getSupabaseAdmin().storage.from(getChatImagesBucket()).createSignedUrls(imagePaths, 60*60);
+  const { data, error } = await getSupabaseAdmin().storage.from(getChatImagesBucket()).createSignedUrls(imagePaths, 60 * 60);
 
   if (error) {
     throw new Error(error.message);
@@ -86,7 +96,7 @@ export async function createSignedChatImageUrls(imagePaths: string[]): Promise<M
   const signedUrls = new Map<string, string>();
 
   data.forEach((item, index) => {
-    if(item.signedUrl) {
+    if (item.signedUrl) {
       signedUrls.set(imagePaths[index], item.signedUrl);
     }
   });

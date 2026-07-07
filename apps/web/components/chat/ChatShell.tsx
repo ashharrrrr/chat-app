@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 
 import ConversationList from "./ConversationList";
@@ -8,13 +9,14 @@ import ChatWindow from "./ChatWindow";
 import { useQueryClient } from "@tanstack/react-query";
 import { useChatSocket } from "@/providers/SocketProvider";
 import { useConversations } from "@/hooks/useConversations";
+import { MessagePayload, ChatSocketMessage } from "@chat/shared-types";
 
 interface ChatShellProps {
   currentUserId: string;
 }
 
 export default function ChatShell({ currentUserId }: ChatShellProps) {
-  
+
   const { data: conversations = [], isPending, isError } = useConversations();
 
 
@@ -25,9 +27,9 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
   )
 
   const socket = useChatSocket();
-  const queryClient  = useQueryClient();
+  const queryClient = useQueryClient();
 
-  useEffect(() =>  {
+  useEffect(() => {
     if (!socket || !conversationId) return;
 
     socket.emit("conversation:join", {
@@ -36,19 +38,26 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
   }, [socket, conversationId])
 
   useEffect(() => {
-    if(!socket) return;
+    if (!socket) return;
 
     const handleMessageNew = ({
       conversationId: newConversationId,
-    }: { conversationId: string; })  => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "messages", newConversationId,
-        ],
-      });
+      message,
+    }: MessagePayload) => {
+
+      queryClient.setQueryData<ChatSocketMessage[]>(
+        ["messages", newConversationId],
+        (old = []) => {
+          if (old.some((m) => m._id === message._id)) {
+            return old;
+          }
+
+          return [...old, message]
+        }
+      )
 
       queryClient.invalidateQueries({
-        queryKey:["conversations"],
+        queryKey: ["conversations"],
       });
     };
 
@@ -70,7 +79,7 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
         onSelect={setConversationId}
       />
 
-      <ChatWindow conversation={selectedConversation} currentUserId={currentUserId}/>
+      <ChatWindow conversation={selectedConversation} currentUserId={currentUserId} />
     </div>
   );
 }
