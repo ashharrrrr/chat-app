@@ -44,12 +44,14 @@ export function useSendMessage() {
     mutationFn: postMessage,
 
     async onMutate(variables) {
-      await queryClient.cancelQueries({
-        queryKey: [
-          "messages",
-          variables.conversationId,
-        ],
-      });
+
+      const messagesKey = ["messages", variables.conversationId] as const;
+      const hasLoadedMessages =
+        queryClient.getQueryState(messagesKey)?.data !== undefined;
+
+      if (hasLoadedMessages) {
+        await queryClient.cancelQueries({ queryKey: messagesKey });
+      }
 
       const previousMessages = queryClient.getQueryData<ChatSocketMessage[]>([
         "messages",
@@ -84,20 +86,33 @@ export function useSendMessage() {
 
       return { previousMessages, optimisticImageUrl };
     },
-
     onSuccess(message, variables) {
-      console.log("SERVER CLIENT ID: ", message.clientId);
+      const queryKey = ["messages", variables.conversationId] as const;
+
+      const state = queryClient.getQueryState(queryKey);
+
+      // If the initial history is still loading,
+      // let it finish and then refetch.
+      if (state?.fetchStatus === "fetching") {
+        queryClient.invalidateQueries({
+          queryKey,
+        });
+
+        return;
+      }
+
+      // Otherwise replace the optimistic message normally.
       queryClient.setQueryData<ChatSocketMessage[]>(
-        ["messages", variables.conversationId],
-        (old = []) => {
-          console.log(old);
-          return old.map((item) => {
-            console.log(item.clientId, message.clientId);
-            return item.clientId === message.clientId ? message : item
-          })
-        }
-      )
+        queryKey,
+        (old = []) =>
+          old.map((item) =>
+            item.clientId === message.clientId
+              ? message
+              : item
+          )
+      );
     },
+
 
     onSettled(_data, _error, _variables, context) {
       if (context?.optimisticImageUrl) {

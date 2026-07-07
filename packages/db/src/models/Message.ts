@@ -1,6 +1,7 @@
 import mongoose, { Schema, Types, type Model } from "mongoose";
 
 export interface IMessage {
+  clientId: string;
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
   content: string;
@@ -12,6 +13,10 @@ export interface IMessage {
 
 const MessageSchema = new Schema<IMessage>(
   {
+    clientId: {
+      type: String,
+      required: true,
+    },
     conversationId: {
       type: Schema.Types.ObjectId,
       ref: "Conversation",

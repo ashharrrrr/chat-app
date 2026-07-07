@@ -19,9 +19,15 @@ export default function ChatWindow({
   currentUserId,
 }: ChatWindowProps) {
 
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const { data, isPending, isError } = useMessages(conversation?._id ?? undefined);
+  console.log({isPending, isError, count: data?.length})
+
+  useEffect(() => {
+    console.log("DATA CHANGED", data?.length);
+  }, [data]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -67,7 +73,7 @@ export default function ChatWindow({
 
           return (
             <div
-              key={message._id}
+              key={message.clientId ?? message._id}
               className={`mb-4 flex ${isMine ? "justify-end" : "justify-start"
                 }`}>
               <div

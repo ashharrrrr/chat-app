@@ -14,6 +14,14 @@ export function useMessages(conversationId?: string) {
 
     enabled: !!conversationId,
 
-    queryFn: () => api<ChatSocketMessage[]>(`api/messages?conversationId=${conversationId}`),
+    queryFn: async() => {
+      console.log("FETCHING", conversationId);
+
+    const result = await api<ChatSocketMessage[]>(`api/messages?conversationId=${conversationId}`)
+
+    console.log("FETCH FINISHED", result.length)
+
+    return result;
+    }
   });
 }

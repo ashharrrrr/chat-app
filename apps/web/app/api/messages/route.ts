@@ -87,7 +87,6 @@ export async function POST(req: Request) {
 
     let imagePath: string | undefined;
 
-    console.log(image instanceof File);
 
     if (image instanceof File) {
       try {
@@ -107,6 +106,7 @@ export async function POST(req: Request) {
     }
 
     const message = await Message.create({
+      clientId,
       conversationId,
       senderId: session.user.id,
       content,

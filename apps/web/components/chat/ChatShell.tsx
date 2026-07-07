@@ -22,6 +22,8 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
 
   const [conversationId, setConversationId] = useState<string | null>(null);
 
+  const activeConversationId = conversationId ?? conversations[0]?._id ?? null;
+
   const selectedConversation = conversations.find(
     (conversation) => conversation._id === conversationId
   )
@@ -45,16 +47,23 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
       message,
     }: MessagePayload) => {
 
-      queryClient.setQueryData<ChatSocketMessage[]>(
+      const state = queryClient.getQueryState(["messages", newConversationId]);
+      console.log("STATE", state);
+      console.log("SOCKET MESSAGE", message.content)
+      queryClient.setQueryData<ChatSocketMessage[] | undefined>(
         ["messages", newConversationId],
-        (old = []) => {
+        (old) => {
+          if (!old) {
+            return old;
+          }
+
           if (old.some((m) => m._id === message._id)) {
             return old;
           }
 
           return [...old, message]
         }
-      )
+      ) 
 
       queryClient.invalidateQueries({
         queryKey: ["conversations"],
@@ -75,7 +84,7 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
         isPending={isPending}
         isError={isError}
         currentUserId={currentUserId}
-        selectedConversationId={conversationId}
+        selectedConversationId={activeConversationId}
         onSelect={setConversationId}
       />
 
