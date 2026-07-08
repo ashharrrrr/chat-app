@@ -5,6 +5,8 @@ import NewConversationForm from "./NewConversationForm";
 import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import type { Conversation } from "@chat/shared-types";
 
+import { ImageIcon } from "lucide-react";
+
 interface ConversationListProps {
   conversations: Conversation[];
   isPending: boolean;
@@ -22,7 +24,6 @@ export default function ConversationList({
   onSelect,
   currentUserId,
 }: ConversationListProps) {
-
   if (isPending) {
     return (
       <aside className="w-80 border-r border-gray-700 bg-gray-800 p-4 text-white">
@@ -49,9 +50,6 @@ export default function ConversationList({
 
       <div className="flex-1 overflow-y-auto">
         {conversations?.map((conversation) => {
-          {
-            console.log("conversation", conversation);
-          }
           const otherParticipantFetch = getOtherParticipant(
             conversation,
             currentUserId,
@@ -59,47 +57,48 @@ export default function ConversationList({
 
           const otherParticipant = otherParticipantFetch?.username ?? "Unknown";
 
+          const lastMessage = conversation.lastMessage;
+          const isMine =
+            lastMessage && String(lastMessage.senderId._id) === currentUserId;
+
+          const senderPrefix = isMine ? "You: " : "";
+
+          const previewContent = lastMessage ? (
+            lastMessage.image ? (
+              <span className="inline-flex min-w-0 items-center gap-1.5">
+                <ImageIcon className="h-3.5 w-3.5 shrink-0 text-sky-400" />
+                <span className="truncate">
+                  {lastMessage.content?.trim() || "Shared image"}
+                </span>
+              </span>
+            ) : (
+              <span className="truncate">{lastMessage.content?.trim()}</span>
+            )
+          ) : (
+            <span className="italic text-gray-500">No messages yet</span>
+          );
+
           return (
             <button
               key={conversation._id}
               onClick={() => onSelect(conversation._id)}
-              className={`
-    w-full
-    border-b
-    p-4
-    text-left
-    hover:bg-muted/50
-    ${selectedConversationId === conversation._id ? "bg-muted" : ""}
-  `}
+              className={`w-full border-b border-gray-700 p-4 text-left transition-colors hover:bg-gray-700/60 ${selectedConversationId === conversation._id ? "bg-gray-700/80" : "bg-transparent"}`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-start gap-3">
                 <ProfileAvatar
                   name={otherParticipant}
                   image={otherParticipantFetch?.image}
                   size="sm"
                 />
-                <div>
-                <p className="font-bold">{otherParticipant}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold text-white">{otherParticipant}</p>
 
-                <p
-                  className="
-      mt-1
-      truncate
-      text-sm
-      text-muted-foreground
-      font-extralight
-    "
-                >
-                  {conversation.lastMessage
-                    ? `${String(conversation.lastMessage.senderId._id) ===
-                      currentUserId
-                      ? "You: "
-                      : ""
-                    } ${conversation.lastMessage.content}`
-                    : "No messages yet"}
-                </p>
+                  <p className="mt-1 flex min-w-0 items-start text-sm leading-5 text-gray-400">
+                    <span className="mr-1.5 text-gray-300">{senderPrefix}</span>
+                    <span className="min-w-0 truncate">{previewContent}</span>
+                  </p>
                 </div>
-                </div>
+              </div>
             </button>
           );
         })}

@@ -1,13 +1,22 @@
 import mongoose, { Schema, Types, type Model } from "mongoose";
 
 export interface IMessage {
+  clientId: string;
   conversationId: Types.ObjectId;
   senderId: Types.ObjectId;
   content: string;
+  image?: string;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const MessageSchema = new Schema<IMessage>(
   {
+    clientId: {
+      type: String,
+      required: true,
+    },
     conversationId: {
       type: Schema.Types.ObjectId,
       ref: "Conversation",
@@ -20,9 +29,12 @@ const MessageSchema = new Schema<IMessage>(
     },
     content: {
       type: String,
-      required: true,
+      default: "",
       trim: true,
       maxLength: 2000,
+    },
+    image: {
+      type: String,
     },
   },
   {

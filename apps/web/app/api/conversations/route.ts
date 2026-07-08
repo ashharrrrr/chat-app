@@ -124,7 +124,7 @@ export async function GET() {
       .sort({ updatedAt: -1 })
       .populate({
         path: "lastMessage",
-        select: "content  senderId createdAt",
+        select: "content  senderId createdAt image",
         populate: {
           path: "senderId",
           select: "username",

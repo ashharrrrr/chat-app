@@ -1,5 +1,6 @@
 "use client";
 
+
 import { useState, useEffect } from "react";
 
 import ConversationList from "./ConversationList";
@@ -8,26 +9,29 @@ import ChatWindow from "./ChatWindow";
 import { useQueryClient } from "@tanstack/react-query";
 import { useChatSocket } from "@/providers/SocketProvider";
 import { useConversations } from "@/hooks/useConversations";
+import { MessagePayload, ChatSocketMessage } from "@chat/shared-types";
 
 interface ChatShellProps {
   currentUserId: string;
 }
 
 export default function ChatShell({ currentUserId }: ChatShellProps) {
-  
+
   const { data: conversations = [], isPending, isError } = useConversations();
 
 
   const [conversationId, setConversationId] = useState<string | null>(null);
+
+  const activeConversationId = conversationId ?? conversations[0]?._id ?? null;
 
   const selectedConversation = conversations.find(
     (conversation) => conversation._id === conversationId
   )
 
   const socket = useChatSocket();
-  const queryClient  = useQueryClient();
+  const queryClient = useQueryClient();
 
-  useEffect(() =>  {
+  useEffect(() => {
     if (!socket || !conversationId) return;
 
     socket.emit("conversation:join", {
@@ -36,19 +40,33 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
   }, [socket, conversationId])
 
   useEffect(() => {
-    if(!socket) return;
+    if (!socket) return;
 
     const handleMessageNew = ({
       conversationId: newConversationId,
-    }: { conversationId: string; })  => {
-      queryClient.invalidateQueries({
-        queryKey: [
-          "messages", newConversationId,
-        ],
-      });
+      message,
+    }: MessagePayload) => {
+
+      const state = queryClient.getQueryState(["messages", newConversationId]);
+      console.log("STATE", state);
+      console.log("SOCKET MESSAGE", message.content)
+      queryClient.setQueryData<ChatSocketMessage[] | undefined>(
+        ["messages", newConversationId],
+        (old) => {
+          if (!old) {
+            return old;
+          }
+
+          if (old.some((m) => m._id === message._id)) {
+            return old;
+          }
+
+          return [...old, message]
+        }
+      ) 
 
       queryClient.invalidateQueries({
-        queryKey:["conversations"],
+        queryKey: ["conversations"],
       });
     };
 
@@ -66,11 +84,11 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
         isPending={isPending}
         isError={isError}
         currentUserId={currentUserId}
-        selectedConversationId={conversationId}
+        selectedConversationId={activeConversationId}
         onSelect={setConversationId}
       />
 
-      <ChatWindow conversation={selectedConversation} currentUserId={currentUserId}/>
+      <ChatWindow conversation={selectedConversation} currentUserId={currentUserId} />
     </div>
   );
 }
