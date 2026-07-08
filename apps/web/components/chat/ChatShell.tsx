@@ -47,9 +47,7 @@ export default function ChatShell({ currentUserId }: ChatShellProps) {
       message,
     }: MessagePayload) => {
 
-      const state = queryClient.getQueryState(["messages", newConversationId]);
-      console.log("STATE", state);
-      console.log("SOCKET MESSAGE", message.content)
+      console.log("SOCKET IMAGE", message.image);
       queryClient.setQueryData<ChatSocketMessage[] | undefined>(
         ["messages", newConversationId],
         (old) => {

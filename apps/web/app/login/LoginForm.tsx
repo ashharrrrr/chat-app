@@ -46,7 +46,8 @@ export default function LoginPage() {
 
     toast.success("Logged in");
 
-    router.push("/chat");
+    router.replace("/chat");
+    router.refresh();
   }
 
   return (
