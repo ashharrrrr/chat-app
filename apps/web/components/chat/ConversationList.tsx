@@ -6,6 +6,7 @@ import ProfileAvatar from "@/components/profile/ProfileAvatar";
 import type { Conversation } from "@chat/shared-types";
 
 import { ImageIcon } from "lucide-react";
+import { ConversationListSkeleton } from "./ChatSkeletons";
 
 interface ConversationListProps {
   conversations: Conversation[];
@@ -27,7 +28,7 @@ export default function ConversationList({
   if (isPending) {
     return (
       <aside className="w-80 border-r border-gray-700 bg-gray-800 p-4 text-white">
-        Loading conversations...
+        <ConversationListSkeleton />
       </aside>
     );
   }
