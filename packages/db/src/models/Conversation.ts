@@ -1,10 +1,27 @@
 import mongoose, { Schema, Types, type Model } from "mongoose";
 
+enum conversationRole {
+  MEMBER = "member",
+  ADMIN = "admin",
+}
+
+interface IParticipant {
+  user: Types.ObjectId;
+
+  role: conversationRole;
+
+  joinedAt: Date;
+}
+
 export interface IConversation {
-  participants: Types.ObjectId[]
+  participants: IParticipant[];
   isGroup: boolean;
-  name?: string;
+  title?: string;
+  image?: string;
   lastMessage?: Types.ObjectId;
+
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const ConversationSchema = new Schema<IConversation>(
@@ -19,10 +36,10 @@ const ConversationSchema = new Schema<IConversation>(
       type: Boolean,
       default: false,
     },
-    
-    name: String,
 
-  lastMessage: {
+    title: String,
+
+    lastMessage: {
       type: Schema.Types.ObjectId,
       ref: "Message",
     },
