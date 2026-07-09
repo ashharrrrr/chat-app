@@ -27,6 +27,10 @@ export interface MessagePayload {
   message: ChatSocketMessage;
 }
 
+export interface GroupEventPayload {
+  conversationId: string;
+}
+
 export interface ClientToServerEvents {
   "conversation:join": (payload: {
     conversationId: string;
@@ -35,7 +39,12 @@ export interface ClientToServerEvents {
 }
 
 export interface ServerToClientEvents {
-  "message:new": (payload: MessagePayload) =>  void;
+  "message:new": (payload: MessagePayload) => void;
+
+  "group:updated": (payload: GroupEventPayload) => void;
+  "group:memberAdded": (payload: GroupEventPayload) => void;
+  "group:memberRemoved": (payload: GroupEventPayload) => void;
+  "group:left": (payload: GroupEventPayload) => void;
 }
 
 export interface SocketData {
