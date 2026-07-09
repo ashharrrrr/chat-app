@@ -1,3 +1,4 @@
+
 export interface SocketUser {
   id: string;
   username: string;

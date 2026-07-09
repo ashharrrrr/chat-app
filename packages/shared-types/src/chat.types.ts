@@ -1,3 +1,5 @@
+export type ConversationRole = "member" | "admin";
+
 export interface Message {
   _id: string;
   clientId?: string;
@@ -7,16 +9,22 @@ export interface Message {
   senderId: {
     _id: string;
     username: string;
-    image ?: string;
+    image?: string;
   }
   optimistic?: boolean,
 }
 
 export interface ConversationParticipant {
-  _id: string;
-  username: string;
-  about: string;
-  image?: string;
+  user: {
+    _id: string;
+    username: string;
+    about: string;
+    image?: string;
+  };
+
+  role: ConversationRole;
+
+  joinedAt: string;
 }
 
 export interface LastMessage {
@@ -36,11 +44,11 @@ export interface Conversation {
   _id: string;
 
   participants: ConversationParticipant[];
-
   isGroup: boolean;
+  title?: string;
+  image?: string;
 
   createdAt: string;
-
   updatedAt: string;
 
   lastMessage?: LastMessage;
