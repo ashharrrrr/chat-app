@@ -19,7 +19,7 @@ export const messageContentSchema = z.object({
 
 export const createGroupSchema = z.object({
   title: z.string().trim().min(3, "Group title mustt be at least 3 characters.").max(50, "Group title must be at most 50 characters"),
-  username: z.array(z.string()).min(1, "Select at least one member.").refine(
+  usernames: z.array(z.string()).min(1, "Select at least one member.").refine(
     (usernames) => new Set(usernames).size === usernames.length,
     {
       message: "Duplicate usernames are not allowed.",

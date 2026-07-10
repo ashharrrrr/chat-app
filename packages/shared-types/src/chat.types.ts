@@ -1,10 +1,4 @@
-
-export const ConversationRole = {
-  MEMBER: "member",
-  ADMIN: "admin"
-}
-
-export type ConversationRole = (typeof ConversationRole)[keyof typeof ConversationRole]
+import { ConversationRole } from "./conversation.types";
 
 export interface Message {
   _id: string;
